@@ -11,6 +11,7 @@ import UIKit
 class MainViewController: UITableViewController {
 
     private let cellID = "cell"
+    private var cities: [City] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,6 +25,11 @@ class MainViewController: UITableViewController {
         let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(longPressed(sender:)))
 //-------> to add to view
         self.view.addGestureRecognizer(longPressRecognizer)
+//-------> to fetch data
+        NetworkManager.fetchData { citiesList in
+            self.cities = citiesList
+            self.tableView.reloadData()
+        }
     }
     
     private func setupNavigationBar(){
@@ -46,27 +52,43 @@ class MainViewController: UITableViewController {
     
     @objc private func longPressed(sender: UILongPressGestureRecognizer){
         print("Long Press tapped")
-        basicActionSheet(title: "Long Press Info", message: "Hello!")
+//-------> to start our touch and to acces indexPath.row
+        if sender.state == UIGestureRecognizer.State.began{
+            let touchPoint = sender.location(in: self.tableView)
+            if let indexPath = tableView.indexPathForRow(at: touchPoint){
+                basicActionSheet(title: cities[indexPath.row].name, message: cities[indexPath.row].capital)
+            }
+        }
     }
     
     @objc private func infoItemTapped(){
         print("Info tapped")
-        basicAlert(title: "Info", message: "Hi There!")
+        basicAlert(title: "Info", message: "Long press to open an action sheet, single tap on cell to open an alert.")
     }
 }
 
 extension  MainViewController{
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 10
+        return cities.count
     }
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         var cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath as IndexPath)
         cell = UITableViewCell(style: UITableViewCell.CellStyle.subtitle, reuseIdentifier: cellID)
-        cell.textLabel?.text = "List"
-        cell.detailTextLabel?.text = "Name"
+        
+        let city = cities[indexPath.row]
+        cell.textLabel?.text = city.name
+        cell.detailTextLabel?.text = city.capital
+        if let region = city.region{
+            cell.detailTextLabel?.text! += " from region: \(region)"
+        }
 //-------> to remove marking/selection style
         cell.selectionStyle = .none
         return cell
+    }
+    
+//-------> on single tap to see in alert what is written below.
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        basicAlert(title: cities[indexPath.row].region, message: "Capital of \(cities[indexPath.row].name ?? "") is \(cities[indexPath.row].capital ?? "")")
     }
 }
 //-------> to add an alert controller
