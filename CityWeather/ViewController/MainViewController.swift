@@ -90,6 +90,15 @@ extension  MainViewController{
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         basicAlert(title: cities[indexPath.row].region, message: "Capital of \(cities[indexPath.row].name ?? "") is \(cities[indexPath.row].capital ?? "")")
     }
+    
+//-------> to have an animation when scrolling 
+    override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        cell.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+        UIView.animate(withDuration: 0.5){
+            cell.transform = CGAffineTransform.identity
+        }
+    }
+    
 }
 //-------> to add an alert controller
 extension  MainViewController{
